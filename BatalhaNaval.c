@@ -1,9 +1,12 @@
 #include <stdio.h>
 
 #define TAM 10
+#define TAM_HAB 5           // Tamanho da Habilidade
 #define NAVIO 3             // representa parte de um navio
 #define TAM_NAVIO 3         // cada navio ocupa 3 posições
 #define AGUA 0              // representa água
+#define HABILIDADE 5        //representa a área afetdada pela habilidade
+
 
 int main(){
 
@@ -59,6 +62,98 @@ int main(){
         tabuleiro[linhaD2 + i][colunaD2 - i] = NAVIO;
     }
 
+
+     // MATRIZES DE HABILIDADE
+    
+    int cone[TAM_HAB][TAM_HAB];
+    int cruz[TAM_HAB][TAM_HAB];
+    int octaedro[TAM_HAB][TAM_HAB];
+
+    // CONE (em forma de triângulo)
+    for (int i = 0; i < TAM_HAB; i++) {
+        for (int j = 0; j < TAM_HAB; j++) {
+            if (j >= TAM_HAB/2 - i && j <= TAM_HAB/2 + i)
+                cone[i][j] = 1;
+            else
+                cone[i][j] = 0;
+        }
+    }
+
+    // CRUZ (linha e coluna centrais)
+    for (int i = 0; i < TAM_HAB; i++) {
+        for (int j = 0; j < TAM_HAB; j++) {
+            if (i == TAM_HAB/2 || j == TAM_HAB/2)
+                cruz[i][j] = 1;
+            else
+                cruz[i][j] = 0;
+        }
+    }
+
+    // OCTAEDRO (losango)
+for (int i = 0; i < TAM_HAB; i++) {
+    for (int j = 0; j < TAM_HAB; j++) {
+        octaedro[i][j] = 0;
+    }
+}
+
+// Cria o formato do losango manualmente
+for (int i = 0; i < TAM_HAB; i++) {
+    for (int j = 0; j < TAM_HAB; j++) {
+
+        // distância vertical até o centro
+        int dist = i <= TAM_HAB/2 ? i : (TAM_HAB - 1 - i);
+
+        // define a área do losango
+        if (j >= (TAM_HAB/2 - dist) && j <= (TAM_HAB/2 + dist)) {
+            octaedro[i][j] = 1;
+        }
+    }
+}
+
+  
+    // APLICAR HABILIDADES NO TABULEIRO
+  
+    int origemConeLinha = 1, origemConeColuna = 7;
+    int origemCruzLinha = 5, origemCruzColuna = 5;
+    int origemOctaLinha = 7, origemOctaColuna = 3;
+
+    // Função para sobrepor matriz de habilidade
+    for (int i = 0; i < TAM_HAB; i++) {
+        for (int j = 0; j < TAM_HAB; j++) {
+            int linhaTab = origemConeLinha + i - TAM_HAB/2;
+            int colunaTab = origemConeColuna + j - TAM_HAB/2;
+
+            if (linhaTab >= 0 && linhaTab < TAM && colunaTab >= 0 && colunaTab < TAM) {
+                if (cone[i][j] == 1 && tabuleiro[linhaTab][colunaTab] == AGUA)
+                    tabuleiro[linhaTab][colunaTab] = HABILIDADE;
+            }
+        }
+    }
+
+    for (int i = 0; i < TAM_HAB; i++) {
+        for (int j = 0; j < TAM_HAB; j++) {
+            int linhaTab = origemCruzLinha + i - TAM_HAB/2;
+            int colunaTab = origemCruzColuna + j - TAM_HAB/2;
+
+            if (linhaTab >= 0 && linhaTab < TAM && colunaTab >= 0 && colunaTab < TAM) {
+                if (cruz[i][j] == 1 && tabuleiro[linhaTab][colunaTab] == AGUA)
+                    tabuleiro[linhaTab][colunaTab] = HABILIDADE;
+            }
+        }
+    }
+
+    for (int i = 0; i < TAM_HAB; i++) {
+        for (int j = 0; j < TAM_HAB; j++) {
+            int linhaTab = origemOctaLinha + i - TAM_HAB/2;
+            int colunaTab = origemOctaColuna + j - TAM_HAB/2;
+
+            if (linhaTab >= 0 && linhaTab < TAM && colunaTab >= 0 && colunaTab < TAM) {
+                if (octaedro[i][j] == 1 && tabuleiro[linhaTab][colunaTab] == AGUA)
+                    tabuleiro[linhaTab][colunaTab] = HABILIDADE;
+            }
+        }
+    }
+
     // Exibe o tabuleiro na tela
     printf("\n=== TABULEIRO DE BATALHA NAVAL ===\n\n");
 
@@ -69,7 +164,7 @@ int main(){
         printf("\n");
     }
 
-    printf("\nLegenda: %d = água | %d = navio\n", AGUA, NAVIO);
+    printf("\nLegenda: %d = água | %d = navio | %d = habilidade\n", AGUA, NAVIO, HABILIDADE);
 
     return 0;
 }
